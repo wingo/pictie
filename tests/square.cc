@@ -8,8 +8,8 @@ int main (int argc, char* argv[]) {
     return 1;
   }
   
-  DrawingContext cx(600);
-  PainterPtr square = transform(color(Color::black()),
+  DrawingContext cx(200);
+  PainterPtr square = transform(color(Color(100, 100, 200)),
                                 Vector(0.1,0.1),
                                 Vector(0.9,0.1),
                                 Vector(0.1,0.9));

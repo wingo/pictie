@@ -65,8 +65,8 @@ struct Frame
   Frame project(const Frame& f) const {
     Vector newOrigin = project(f.origin);
     return Frame(newOrigin,
-                 Vector::sub(project(f.edge1), newOrigin),
-                 Vector::sub(project(f.edge2), newOrigin));
+                 project(f.origin.add(f.edge1)).sub(newOrigin),
+                 project(f.origin.add(f.edge2)).sub(newOrigin));
   }
 };
 

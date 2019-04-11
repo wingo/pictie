@@ -5,7 +5,7 @@ DrawingContext::DrawingContext(uint32_t resolution)
   : width_(resolution), height_(resolution),
     canvasFrame_(Vector(0,resolution),
                  Vector(resolution,0),
-                 Vector(0,-resolution)),
+                 Vector(0,-double(resolution))),
     pixels_(new Color[resolution * resolution]) {
   fill(Color::white());
 }
@@ -17,7 +17,7 @@ void DrawingContext::fill(const Color& color) {
 }
 
 static bool rightOf(const Vector &a, const Vector &b, const Vector &c) {
-  return (c.x - a.x) * (b.y - a.y) - (c.y - a.y) * (b.x - a.x) > 0;
+  return (c.x - a.x) * (b.y - a.y) - (c.y - a.y) * (b.x - a.x) >= 0;
 }
 
 static bool insideTriangle(const Vector& a, const Vector &b, const Vector &c,
@@ -184,7 +184,7 @@ PainterPtr image(uint32_t width, uint32_t height,
 PainterPtr transform(PainterPtr painter,
                      const Vector& origin, const Vector& corner1,
                      const Vector& corner2) {
-  return PainterPtr(new TransformPainter(painter, origin, corner1, corner1));
+  return PainterPtr(new TransformPainter(painter, origin, corner1, corner2));
 }
 
 PainterPtr over(PainterPtr a, PainterPtr b) {
