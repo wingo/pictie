@@ -26,3 +26,10 @@ language](https://docs.racket-lang.org/sicp-manual/SICP_Picture_Language.html)
 ([source](https://github.com/sicp-lang/sicp/blob/master/sicp-pict/main.rkt)).
 
 The canvas implementation in Pictie was written from scratch for the project.
+
+## License
+
+The pictie example code is currently under the GNU Lesser General Public
+License, version 3.0.  I am working on getting it licensed under
+something more permissive, but in any case any eventual WebAssembly
+integrations will be licensed under something more permissive.
