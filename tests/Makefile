@@ -1,7 +1,7 @@
 TESTS=$(sort $(basename $(wildcard *.cc)))
 
 CXX = g++
-CFLAGS = -Wall -O0 -g
+CFLAGS = -Wall -O2 -g
 
 all: $(addprefix test-,$(TESTS))
 
@@ -22,4 +22,4 @@ test-%: %.cc pictie.o
 	$(CXX) $(CFLAGS) $(CPPFLAGS) -I.. -o $@ pictie.o $<
 
 clean:
-	rm -f $(addprefix test-%-,$(TESTS))
+	rm -f $(addprefix test-,$(TESTS)) pictie.o

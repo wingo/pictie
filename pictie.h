@@ -86,6 +86,7 @@ struct Color
 };
 
 enum class LineCapStyle { Butt, Square };
+enum class LineWidthScaling { Scaled, Unscaled };
 
 class DrawingContext
 {
@@ -139,13 +140,15 @@ private:
   const Color color_;
   double width_;
   LineCapStyle lineCapStyle_;
+  LineWidthScaling widthScaling_;
 
 public:
   SegmentsPainter(std::vector<Segment> segments, const Color& color,
                   double width = 1.0,
-                  LineCapStyle lineCapStyle = LineCapStyle::Butt)
+                  LineCapStyle lineCapStyle = LineCapStyle::Butt,
+                  LineWidthScaling widthScaling = LineWidthScaling::Unscaled)
     : segments_(segments), color_(color), width_(width),
-      lineCapStyle_(lineCapStyle) {}
+      lineCapStyle_(lineCapStyle), widthScaling_(widthScaling) {}
 
   void paint(DrawingContext &cx, const Frame& frame) const;
 };
@@ -202,7 +205,8 @@ public:
 PainterPtr color(const Color& color);
 PainterPtr segments(std::vector<Segment> segments, const Color& color,
                     double width = 1.0,
-                    LineCapStyle lineCapStyle = LineCapStyle::Butt);
+                    LineCapStyle lineCapStyle = LineCapStyle::Butt,
+                    LineWidthScaling widthScaling = LineWidthScaling::Unscaled);
 PainterPtr image(uint32_t width, uint32_t height,
                  std::unique_ptr<Color[]> pixels);
 PainterPtr transform(PainterPtr painter, const Vector& origin,
@@ -220,9 +224,6 @@ PainterPtr above3(PainterPtr a, PainterPtr b, PainterPtr c);
 PainterPtr black();
 PainterPtr gray();
 PainterPtr white();
-PainterPtr vects(std::vector<Vector> vects);
-PainterPtr markOfZorro();
-PainterPtr grid(double width, double height, std::vector<Segment> segs);
-PainterPtr escher();
 
 void paint(DrawingContext& cx, const Painter& p);
+static inline void paint(DrawingContext& cx, PainterPtr p) { paint(cx, *p); }
