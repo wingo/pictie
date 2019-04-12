@@ -115,93 +115,161 @@ bool DrawingContext::writePPM(const char *fname) {
   return true;
 }
   
-void ColorPainter::paint(DrawingContext &cx, const Frame& frame) const {
-  cx.drawRectangle(frame.origin,
-                   frame.origin.add(frame.edge1),
-                   frame.origin.add(frame.edge1).add(frame.edge2),
-                   frame.origin.add(frame.edge2),
-                   color_);
-}
+class ColorPainter : public Painter
+{
+private:
+  const Color color_;
 
-void SegmentsPainter::paint(DrawingContext &cx, const Frame& frame) const {
-  double width;
-  switch (widthScaling_) {
-  case LineWidthScaling::Scaled: {
-    double diagonal = frame.edge1.add(frame.edge2).magnitude();
-    double unitDiagonal = Vector(1,1).magnitude();
-    width = width_ * diagonal / unitDiagonal;
-    break;
+public:
+  explicit ColorPainter(const Color& color) : color_(color) {}
+  void paint(DrawingContext &cx, const Frame& frame) const {
+    cx.drawRectangle(frame.origin,
+                     frame.origin.add(frame.edge1),
+                     frame.origin.add(frame.edge1).add(frame.edge2),
+                     frame.origin.add(frame.edge2),
+                     color_);
   }
-  case LineWidthScaling::Unscaled:
-    width = width_;
-    break;
-  default:
-    abort();
-  }
-  for (auto segment : segments_)
-    cx.drawLine(frame.project(segment.start), frame.project(segment.end),
-                color_, width, lineCapStyle_);
 };
                       
-ImagePainter* ImagePainter::fromPPM(const char *fname) {
-  FILE *f = fopen(fname, "r");
-  if (!f) {
-    fprintf(stderr, "failed to open %s: ", fname);
-    perror(NULL);
-    return nullptr;
-  }
-  unsigned int width = 0;
-  unsigned int height = 0;
-  if (fscanf(f, "P6\n%u %u\n255\n", &width, &height) != 2) {
-    fprintf(stderr, "expected PPM header on %s\n", fname);
-    fclose(f);
-    return nullptr;
-  }
-  if (width * height == 0) {
-    fprintf(stderr, "bad dimensions for PPM file %s: %u x %u\n", fname,
-            width, height);
-    fclose(f);
-    return nullptr;
-  }
-    
-  std::unique_ptr<Color[]> pixels(new Color[width * height]);
-  for (uint32_t y = 0; y < height; y++) {
-    for (uint32_t x = 0; x < width; x++) {
-      int r, g, b;
-      r = fgetc(f); g = fgetc(f); b = fgetc(f);
-      if (r == EOF || g == EOF || b == EOF) {
-        fprintf(stderr, "got EOF while reading PPM data from %s\n", fname);
-        fclose(f);
-        return nullptr;
-      }
-      pixels[y * width + x] = Color(r, g, b);
+class SegmentsPainter : public Painter
+{
+private:
+  std::vector<Segment> segments_;
+  const Color color_;
+  double width_;
+  LineCapStyle lineCapStyle_;
+  LineWidthScaling widthScaling_;
+
+public:
+  SegmentsPainter(std::vector<Segment> segments, const Color& color,
+                  double width = 1.0,
+                  LineCapStyle lineCapStyle = LineCapStyle::Butt,
+                  LineWidthScaling widthScaling = LineWidthScaling::Unscaled)
+    : segments_(segments), color_(color), width_(width),
+      lineCapStyle_(lineCapStyle), widthScaling_(widthScaling) {}
+
+  void paint(DrawingContext &cx, const Frame& frame) const {
+    double width;
+    switch (widthScaling_) {
+    case LineWidthScaling::Scaled: {
+      double diagonal = frame.edge1.add(frame.edge2).magnitude();
+      double unitDiagonal = Vector(1,1).magnitude();
+      width = width_ * diagonal / unitDiagonal;
+      break;
     }
-  }
-
-  if (fgetc(f) != EOF) {
-    fprintf(stderr, "expected EOF after reading PPM data from %s\n", fname);
-    fclose(f);
-    return nullptr;
-  }
-      
-  fclose(f);
-
-  return new ImagePainter(width, height, std::move(pixels));
-}
-
-void ImagePainter::paint(DrawingContext &cx, const Frame& frame) const {
-  cx.drawPixels(width_, height_, pixels_.get(), frame.origin, frame.edge1,
-                frame.edge2);
-}
+    case LineWidthScaling::Unscaled:
+      width = width_;
+      break;
+    default:
+      abort();
+    }
+    for (auto segment : segments_)
+      cx.drawLine(frame.project(segment.start), frame.project(segment.end),
+                  color_, width, lineCapStyle_);
+  };
+};
                       
-void TransformPainter::paint(DrawingContext &cx, const Frame& frame) const {
-  painter_->paint(cx, frame.project(frame_));
-}
+class ImagePainter : public Painter
+{
+private:
+  uint32_t width_;
+  uint32_t height_;
+  std::unique_ptr<const Color[]> pixels_;
 
-void OverPainter::paint(DrawingContext &cx, const Frame& frame) const {
-  first_->paint(cx, frame);
-  second_->paint(cx, frame);
-}
+public:
+  // Takes ownership of pixels.
+  ImagePainter(uint32_t width, uint32_t height,
+               std::unique_ptr<const Color[]> pixels)
+    : width_(width), height_(height), pixels_(std::move(pixels))
+  {}
+  
+  static ImagePainter* fromPPM(const char *fname) {
+    FILE *f = fopen(fname, "r");
+    if (!f) {
+      fprintf(stderr, "failed to open %s: ", fname);
+      perror(NULL);
+      return nullptr;
+    }
+    unsigned int width = 0;
+    unsigned int height = 0;
+    if (fscanf(f, "P6\n%u %u\n255\n", &width, &height) != 2) {
+      fprintf(stderr, "expected PPM header on %s\n", fname);
+      fclose(f);
+      return nullptr;
+    }
+    if (width * height == 0) {
+      fprintf(stderr, "bad dimensions for PPM file %s: %u x %u\n", fname,
+              width, height);
+      fclose(f);
+      return nullptr;
+    }
+    
+    std::unique_ptr<Color[]> pixels(new Color[width * height]);
+    for (uint32_t y = 0; y < height; y++) {
+      for (uint32_t x = 0; x < width; x++) {
+        int r, g, b;
+        r = fgetc(f); g = fgetc(f); b = fgetc(f);
+        if (r == EOF || g == EOF || b == EOF) {
+          fprintf(stderr, "got EOF while reading PPM data from %s\n", fname);
+          fclose(f);
+          return nullptr;
+        }
+        pixels[y * width + x] = Color(r, g, b);
+      }
+    }
+
+    if (fgetc(f) != EOF) {
+      fprintf(stderr, "expected EOF after reading PPM data from %s\n", fname);
+      fclose(f);
+      return nullptr;
+    }
+      
+    fclose(f);
+
+    return new ImagePainter(width, height, std::move(pixels));
+  }
+
+  void paint(DrawingContext &cx, const Frame& frame) const {
+    cx.drawPixels(width_, height_, pixels_.get(), frame.origin, frame.edge1,
+                  frame.edge2);
+  }
+};
+                      
+class TransformPainter : public Painter
+{
+private:
+  PainterPtr painter_;
+  const Frame frame_;
+
+public:
+  TransformPainter(PainterPtr painter,
+                   const Vector& origin, const Vector& corner1,
+                   const Vector& corner2)
+    : painter_(painter),
+      frame_(origin, corner1.sub(origin), corner2.sub(origin))
+  {}
+  
+  void paint(DrawingContext &cx, const Frame& frame) const {
+    painter_->paint(cx, frame.project(frame_));
+  }
+
+};
+
+class OverPainter : public Painter
+{
+private:
+  PainterPtr first_;
+  PainterPtr second_;
+
+public:
+  OverPainter(PainterPtr first, PainterPtr second)
+    : first_(first), second_(second) {}
+  
+  void paint(DrawingContext &cx, const Frame& frame) const {
+    first_->paint(cx, frame);
+    second_->paint(cx, frame);
+  }
+};
 
 PainterPtr color(const Color& color) {
   return PainterPtr(new ColorPainter(color));
