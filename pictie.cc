@@ -83,13 +83,18 @@ void DrawingContext::drawLine(const Vector& a, const Vector &b,
   }
 }
     
-// Temporary implementation.
 void DrawingContext::drawPixels(uint32_t pixelWidth, uint32_t pixelHeight,
                                 const Color* pixels, const Vector& origin,
                                 const Vector& edge1, const Vector& edge2) {
-  drawRectangle(origin, origin.add(edge1),
-                origin.add(edge1).add(edge2), origin.add(edge2),
-                Color::black());
+  Vector dx = edge1.scale(1./pixelWidth);
+  Vector dy = edge2.scale(1./pixelHeight);
+  Vector row = origin;
+  for (uint32_t y = 0; y < pixelHeight; y++, row = row.add(dy)) {
+    Vector p = row;
+    for (uint32_t x = 0; x < pixelWidth; x++, p = p.add(dx))
+      drawRectangle(p, p.add(dx), p.add(dx).add(dy), p.add(dy),
+                    pixels[(pixelHeight - y - 1) * pixelWidth + x]);
+  }
 }
 
 bool DrawingContext::writePPM(const char *fname) {
