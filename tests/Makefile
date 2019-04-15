@@ -10,6 +10,11 @@ check: all
 	@set -e; for test in $(TESTS); do \
 	  echo "Testing: $$test"; \
 	  ./test-$$test test-$$test.ppm; \
+	  if convert test-$$test.ppm test-$$test.png; then \
+            echo "wrote output to test-$$test.png"; \
+          else \
+            echo "imagemagick's convert unavailable; not making test-$$test.png"; \
+          fi; \
 	done
 	@echo "Success."
 
