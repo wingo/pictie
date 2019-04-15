@@ -11,8 +11,8 @@
   </head>
   <body>
     <h1>Pictie WebAssembly Workbench</h1>
+    <h2 id="status">Loading JavaScript...</h2>
     <div id="log">
-      <h2>Loading JavaScript...</h2>
     </div>
     <form id="form" hidden=1>
       <label id="prompt" for="entry">&gt;&nbsp;</label>
@@ -23,30 +23,35 @@
   </body>
   <script type='text/javascript'>
     let beginLoad = Date.now();
+    let $ = document.getElementById.bind(document);
     let addLog = (container, html) => {
       let e = document.createElement(container);
       e.innerHTML = html
-      document.getElementById('log').appendChild(e);
+      $('log').appendChild(e);
     };
     let defCount = 0;
     let ignoredDefinitions = new Set();
     var Module = {
       preRun() {
-        addLog('h2', "Initializing WebAssembly...");
+        $('status').innerHTML = "Initializing WebAssembly...";
         for (let k in Module) ignoredDefinitions.add(k);
       },
       postRun() {
-        addLog('h2', "Ready.");
-        addLog('p', `Loading took ${Date.now() - beginLoad}ms.`);
-        document.getElementById('form').hidden = false;
+        $('status').innerHTML = "Ready.";
+        addLog('p', `Welcome to Pictie.  Loading took ${Date.now() -
+    beginLoad}ms.  Put a Pictie expression in the prompt below.  Some examples:`);
+        $('form').hidden = false;
         for (let k in Module)
           if (!(k in window) && !ignoredDefinitions.has(k))
             window[k] = Module[k];
-        document.getElementById('entry').focus();
+        evalAndPaint('bg = below(black(), gray())');
+        evalAndPaint('function check(a, inv) { let row = beside3(a, inv(a), a); return above3(row, inv(row), row); }');
+        evalAndPaint('check(bg, flipVert)');
+        $('entry').focus();
       },
     };
     let paintImage = painter => {
-      let width = 400, height = 400;
+      let width = 250, height = 250;
       let dx = new DrawingContext(width);
       paint(dx, painter);
       let pixels = dx.getPixels(); 
@@ -86,7 +91,7 @@
             x.className = 'painter';
             x.innerHTML = `<tt>${def} = </tt>`;
             x.appendChild(img);
-            document.getElementById('log').appendChild(x);
+            $('log').appendChild(x);
           } else {
             addLog('pre', def + ' = ' + result);
           }
@@ -95,8 +100,8 @@
         addLog('pre', e.toString());
       }
     }
-    document.getElementById('form').onsubmit = event => {
-      let entry = document.getElementById('entry');
+    $('form').onsubmit = event => {
+      let entry = $('entry');
       let expr = entry.value;
       entry.value = '';
       evalAndPaint(expr);
