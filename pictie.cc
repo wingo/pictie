@@ -44,13 +44,16 @@ static T clamp(T lo, T x, T hi) { return max(lo, min(x, hi)); }
 
 void DrawingContext::drawTriangle(const Vector& a, const Vector& b,
                                   const Vector& c, const Color& color) {
-  const Vector ca = canvasFrame_.project(a);
-  const Vector cb = canvasFrame_.project(b);
-  const Vector cc = canvasFrame_.project(c);
+  Vector ca = canvasFrame_.project(a);
+  Vector cb = canvasFrame_.project(b);
+  Vector cc = canvasFrame_.project(c);
   uint32_t miny = floor(clamp(0.0, min(ca.y, cb.y, cc.y), double(height_)));
   uint32_t maxy = ceil(clamp(0.0, max(ca.y, cb.y, cc.y), double(height_)));
   uint32_t minx = floor(clamp(0.0, min(ca.x, cb.x, cc.x), double(width_)));
   uint32_t maxx = ceil(clamp(0.0, max(ca.x, cb.x, cc.x), double(width_)));
+
+  if (!rightOf(ca, cb, cc))
+    std::swap(cb, cc);
 
   for (uint32_t y = miny; y < maxy; y++)
     for (uint32_t x = minx; x < maxx; x++)
@@ -311,7 +314,7 @@ PainterPtr flipHoriz(PainterPtr painter) {
 };
 
 PainterPtr flipVert(PainterPtr painter) {
-  return transform(painter, Vector(1, 0), Vector(0, 0), Vector(1, 1));
+  return transform(painter, Vector(0, 1), Vector(1, 1), Vector(0, 0));
 };
 
 PainterPtr rotate90(PainterPtr painter) {
