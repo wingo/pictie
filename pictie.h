@@ -116,8 +116,9 @@ public:
 class Painter
 {
 protected:
-  Painter() {};
+  Painter() {}
 public:
+  virtual ~Painter() {}
   virtual void paint(DrawingContext &cx, const Frame& frame) const = 0;
 };
 
