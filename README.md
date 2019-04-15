@@ -29,7 +29,8 @@ The canvas implementation in Pictie was written from scratch for the project.
 
 ## License
 
-The pictie example code is currently under the GNU Lesser General Public
-License, version 3.0.  I am working on getting it licensed under
-something more permissive, but in any case any eventual WebAssembly
-integrations will be licensed under something more permissive.
+The pictie example code is available
+[Emscripten's licensing
+terms](https://emscripten.org/docs/introducing_emscripten/emscripten_license.html),
+which is a permissive free software license.  See [the LICENSE
+file](https://github.com/wingo/pictie/blob/master/LICENSE) for full details.
