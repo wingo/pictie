@@ -7,13 +7,13 @@ EMXX=$(EMSCRIPTEN)/em++
 EMCC=$(EMSCRIPTEN)/emcc
 EMRUN=$(EMSCRIPTEN)/emrun
 
-all: pictie.html
+all: pictie.js
 
-pictie.html: pictie.cc pictie.h pictie.bindings.cc
-	$(EMXX) --bind -s WASM=1 $(CFLAGS) -o pictie.html pictie.cc pictie.bindings.cc
+pictie.js: pictie.cc pictie.h pictie.bindings.cc
+	$(EMXX) --bind -s ENVIRONMENT=web -s WASM=1 $(CFLAGS) -o pictie.js pictie.cc pictie.bindings.cc
 
-run: pictie.html
+run: pictie.js
 	$(EMRUN) pictie.html
 
 clean:
-	rm -f pictie.js pictie.wasm pictie.html pictie.wasm.map
+	rm -f pictie.js pictie.wasm pictie.wasm.map

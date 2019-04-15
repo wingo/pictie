@@ -23,6 +23,7 @@ EMSCRIPTEN_BINDINGS(interface_tests) {
     .property("start", &Segment::start)
     .property("end", &Segment::end)
     ;
+  register_vector<Segment>("SegmentArray");
 
   class_<Frame>("Frame")
     .constructor<Vector, Vector, Vector>()
@@ -44,6 +45,7 @@ EMSCRIPTEN_BINDINGS(interface_tests) {
     .property("g", &Color::g)
     .property("b", &Color::b)
     ;
+  register_vector<Color>("ColorArray");
 
   enum_<LineCapStyle>("LineCapStyle")
     .value("Butt", LineCapStyle::Butt)
@@ -63,6 +65,7 @@ EMSCRIPTEN_BINDINGS(interface_tests) {
     .function("drawLine", &DrawingContext::drawLine)
     // FIXME: .function("drawPixels", &DrawingContext::drawPixels)
     // FIXME: .function("writePPM", &DrawingContext::writePPM)
+    .function("getPixels", &DrawingContext::getPixels)
     ;
 
   class_<Painter>("Painter")

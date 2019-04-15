@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <title>Pictie WebAssembly Workbench</title>
+    <style>
+      #entry, #prompt {
+        font-family: monospace;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Pictie WebAssembly Workbench</h1>
+    <div id="log">
+      <h2>Loading JavaScript...</h2>
+    </div>
+    <form id="form" hidden=1>
+      <label id="prompt" for="entry">&gt;&nbsp;</label>
+      <input type="text" id="entry" name="entry"
+             placeholder="beside3(black(), white(), gray())"
+             size="80">
+    </form>
+  </body>
+  <script type='text/javascript'>
+    let beginLoad = Date.now();
+    let addLog = (container, html) => {
+      let e = document.createElement(container);
+      e.innerHTML = html
+      document.getElementById('log').appendChild(e);
+    };
+    let defCount = 0;
+    let ignoredDefinitions = new Set();
+    var Module = {
+      preRun() {
+        addLog('h2', "Initializing WebAssembly...");
+        for (let k in Module) ignoredDefinitions.add(k);
+      },
+      postRun() {
+        addLog('h2', "Ready.");
+        addLog('p', `Loading took ${Date.now() - beginLoad}ms.`);
+        document.getElementById('form').hidden = false;
+        for (let k in Module)
+          if (!(k in window) && !ignoredDefinitions.has(k))
+            window[k] = Module[k];
+        document.getElementById('entry').focus();
+      },
+    };
+    let paintImage = painter => {
+      let width = 400, height = 400;
+      let dx = new DrawingContext(width);
+      paint(dx, painter);
+      let pixels = dx.getPixels(); 
+
+      var c = document.createElement("canvas");
+      c.width = width;
+      c.height = height;
+      var ctx = c.getContext("2d");
+      var buf = ctx.createImageData(width, height);
+      for (let y=0; y<buf.height; y++) {
+        for (let x=0; x<buf.width; x++) {
+          let off = y*buf.width + x;
+          let p = pixels.get(off);
+          buf.data[off*4+0] = p.r;
+          buf.data[off*4+1] = p.g;
+          buf.data[off*4+2] = p.b;
+          buf.data[off*4+3] = 255;
+        }
+      }
+      ctx.putImageData(buf, 0, 0); 
+      return c;
+    }
+    let evalAndPaint = expr => {
+      addLog('pre', '> ' + expr);
+      let eval_ = eval;
+      let result, success = false;
+      try {
+        result = eval_(expr);
+        success = true;
+        if (typeof result !== 'undefined' && typeof result !== 'null') {
+          let repr;
+          let def = '$' + defCount++;
+          window[def] = result;
+          if (result instanceof Module.Painter) {
+            let img = paintImage(result);
+            let x = document.createElement('p');
+            x.className = 'painter';
+            x.innerHTML = `<tt>${def} = </tt>`;
+            x.appendChild(img);
+            document.getElementById('log').appendChild(x);
+          } else {
+            addLog('pre', def + ' = ' + result);
+          }
+        }
+      } catch (e) {
+        addLog('pre', e.toString());
+      }
+    }
+    document.getElementById('form').onsubmit = event => {
+      let entry = document.getElementById('entry');
+      let expr = entry.value;
+      entry.value = '';
+      evalAndPaint(expr);
+      event.preventDefault();
+    };
+  </script>
+  <script async type="text/javascript" src="pictie.js"></script>
+</html>
