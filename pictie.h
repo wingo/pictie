@@ -94,11 +94,14 @@ private:
   uint32_t width_;
   uint32_t height_;
   const Frame canvasFrame_;
-  std::unique_ptr<Color[]> pixels_;
+  std::vector<Color> pixels_;
 
 public:
   DrawingContext(uint32_t resolution);
   
+  uint32_t width() const { return width_; };
+  uint32_t height() const { return height_; };
+
   void fill(const Color& color);
 
   void drawTriangle(const Vector& a, const Vector &b, const Vector &c,
@@ -111,6 +114,8 @@ public:
                   const Vector& origin, const Vector& edge1, const Vector& edge2);
 
   bool writePPM(const char *fname);
+
+  std::vector<Color> getPixels() const;
 };
   
 class Painter
@@ -125,7 +130,7 @@ public:
 using PainterPtr = std::shared_ptr<const Painter>;
 
 PainterPtr color(const Color& color);
-PainterPtr segments(std::vector<Segment> segments, const Color& color,
+PainterPtr segments(const std::vector<Segment> segments, const Color& color,
                     double width = 1.0,
                     LineCapStyle lineCapStyle = LineCapStyle::Butt,
                     LineWidthScaling widthScaling = LineWidthScaling::Unscaled);

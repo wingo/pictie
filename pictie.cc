@@ -6,7 +6,7 @@ DrawingContext::DrawingContext(uint32_t resolution)
     canvasFrame_(Vector(0,resolution),
                  Vector(resolution,0),
                  Vector(0,-double(resolution))),
-    pixels_(new Color[resolution * resolution]) {
+    pixels_(resolution * resolution) {
   fill(Color::white());
 }
   
@@ -120,6 +120,10 @@ bool DrawingContext::writePPM(const char *fname) {
   return true;
 }
   
+std::vector<Color> DrawingContext::getPixels() const {
+  return pixels_;
+}
+
 class ColorPainter : public Painter
 {
 private:
@@ -146,7 +150,7 @@ private:
   LineWidthScaling widthScaling_;
 
 public:
-  SegmentsPainter(std::vector<Segment> segments, const Color& color,
+  SegmentsPainter(const std::vector<Segment> segments, const Color& color,
                   double width = 1.0,
                   LineCapStyle lineCapStyle = LineCapStyle::Butt,
                   LineWidthScaling widthScaling = LineWidthScaling::Unscaled)
@@ -179,13 +183,13 @@ class ImagePainter : public Painter
 private:
   uint32_t width_;
   uint32_t height_;
-  std::unique_ptr<const Color[]> pixels_;
+  std::vector<Color> pixels_;
 
 public:
   // Takes ownership of pixels.
   ImagePainter(uint32_t width, uint32_t height,
-               std::unique_ptr<const Color[]> pixels)
-    : width_(width), height_(height), pixels_(std::move(pixels))
+               std::vector<Color>&& pixels)
+    : width_(width), height_(height), pixels_(pixels)
   {}
   
   static ImagePainter* fromPPM(const char *fname) {
@@ -209,7 +213,7 @@ public:
       return nullptr;
     }
     
-    std::unique_ptr<Color[]> pixels(new Color[width * height]);
+    std::vector<Color> pixels(width * height);
     for (uint32_t y = 0; y < height; y++) {
       for (uint32_t x = 0; x < width; x++) {
         int r, g, b;
@@ -235,7 +239,7 @@ public:
   }
 
   void paint(DrawingContext &cx, const Frame& frame) const {
-    cx.drawPixels(width_, height_, pixels_.get(), frame.origin, frame.edge1,
+    cx.drawPixels(width_, height_, pixels_.data(), frame.origin, frame.edge1,
                   frame.edge2);
   }
 };
@@ -280,7 +284,7 @@ PainterPtr color(const Color& color) {
   return PainterPtr(new ColorPainter(color));
 }
 
-PainterPtr segments(std::vector<Segment> segments, const Color& color,
+PainterPtr segments(const std::vector<Segment> segments, const Color& color,
                     double width, LineCapStyle lineCapStyle,
                     LineWidthScaling widthScaling) {
   return PainterPtr(new SegmentsPainter(std::move(segments), color, width,
@@ -288,7 +292,7 @@ PainterPtr segments(std::vector<Segment> segments, const Color& color,
 }
 
 PainterPtr image(uint32_t width, uint32_t height,
-                 std::unique_ptr<Color[]> pixels) {
+                 std::vector<Color>&& pixels) {
   return PainterPtr(new ImagePainter(width, height, std::move(pixels)));
 }
 
