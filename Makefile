@@ -6,11 +6,12 @@ EMSCRIPTEN=/usr/bin
 EMXX=$(EMSCRIPTEN)/em++
 EMCC=$(EMSCRIPTEN)/emcc
 EMRUN=$(EMSCRIPTEN)/emrun
+EMFLAGS=-Oz
 
 all: pictie.js
 
 pictie.js: pictie.cc pictie.h pictie.bindings.cc
-	$(EMXX) --bind -s ENVIRONMENT=web -s WASM=1 $(CFLAGS) -o pictie.js pictie.cc pictie.bindings.cc
+	$(EMXX) $(EMFLAGS) --bind -s ENVIRONMENT=web -s WASM=1 $(CFLAGS) -o pictie.js pictie.cc pictie.bindings.cc
 
 run: pictie.js
 	$(EMRUN) pictie.html
