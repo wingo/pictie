@@ -13,7 +13,7 @@ int main (int argc, char* argv[]) {
                                 Vector(0.1,0.1),
                                 Vector(0.9,0.1),
                                 Vector(0.1,0.9));
-  paint(cx, *square);
+  paint(cx, square);
 
   if (!cx.writePPM(argv[1])) {
     return 1;

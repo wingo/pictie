@@ -147,5 +147,4 @@ PainterPtr black();
 PainterPtr gray();
 PainterPtr white();
 
-void paint(DrawingContext& cx, const Painter& p);
-static inline void paint(DrawingContext& cx, PainterPtr p) { paint(cx, *p); }
+void paint(DrawingContext& cx, PainterPtr p);

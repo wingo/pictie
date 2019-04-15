@@ -352,7 +352,7 @@ PainterPtr white() { return color(Color::white()); }
 // (define diagonal-shading (procedure->painter (λ (x y) (* 100 (+ x y)))))
 // (define einstein         (bitmap->painter einstein-file))
 
-void paint(DrawingContext& cx, const Painter& p) {
+void paint(DrawingContext& cx, PainterPtr p) {
   cx.fill(Color::white());
-  p.paint(cx, Frame(Vector(0,0), Vector(1,0), Vector(0,1)));
+  p->paint(cx, Frame(Vector(0,0), Vector(1,0), Vector(0,1)));
 }
