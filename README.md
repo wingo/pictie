@@ -12,20 +12,21 @@ Coming soon!
 
 ## History
 
-Pictie is inspired by Peter Henderson's *Functional Geometry* ([original
-1982 paper](http://pmh-systems.co.uk/phAcademic/papers/funcgeo.pdf),
-[updated 2002 paper](https://eprints.soton.ac.uk/257577/1/funcgeo2.pdf).
-*Functional Geometry* inspired the [Picture
+Pictie is inspired by Peter Henderson's "Functional Geometry"
+([1982](http://pmh-systems.co.uk/phAcademic/papers/funcgeo.pdf),
+[2002](https://eprints.soton.ac.uk/257577/1/funcgeo2.pdf)).  "Functional
+Geometry" inspired the [Picture
 language](https://sarabander.github.io/sicp/html/2_002e2.xhtml#g_t2_002e2_002e4)
 from the well-known *Structure and Interpretation of Computer Programs*
 computer science textbook.
 
-Pictie takes its functional geometry implementation from
-[Racket](https://racket-lang.org/), via [its port of the picture
+Pictie takes its functional geometry implementation from Michael Sperber
+and Jens Axel Søgaard's [port of the picture
 language](https://docs.racket-lang.org/sicp-manual/SICP_Picture_Language.html)
 ([source](https://github.com/sicp-lang/sicp/blob/master/sicp-pict/main.rkt)).
 
-The canvas implementation in Pictie was written from scratch for the project.
+The simple rasterizing canvas implementation in Pictie was written from
+scratch for the project.
 
 ## License
 
