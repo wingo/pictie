@@ -17,13 +17,7 @@ EMSCRIPTEN_BINDINGS(interface_tests) {
     .function("normalize", static_cast<Vector (Vector::*)(double) const>(&Vector::normalize))
     .function("rotate90DegreesClockwise",  static_cast<Vector (Vector::*)() const>(&Vector::rotate90DegreesClockwise))
     ;
-
-  class_<Segment>("Segment")
-    .constructor<Vector, Vector>()
-    .property("start", &Segment::start)
-    .property("end", &Segment::end)
-    ;
-  register_vector<Segment>("SegmentArray");
+  register_vector<Vector>("VectorArray");
 
   class_<Frame>("Frame")
     .constructor<Vector, Vector, Vector>()
@@ -74,8 +68,8 @@ EMSCRIPTEN_BINDINGS(interface_tests) {
     ;
 
   function("triangle", &triangle);
-  function("segments", &segments);
-  // FIXME: function("image", &image);
+  function("path", &path);
+  function("image", &image);
   function("transform", &transform);
   function("over", &over);
   function("parallelogram", &parallelogram);

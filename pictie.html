@@ -24,9 +24,12 @@
   <script type='text/javascript'>
     let beginLoad = Date.now();
     let $ = document.getElementById.bind(document);
+    let escape = str => {
+      return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    };
     let addLog = (container, html) => {
       let e = document.createElement(container);
-      e.innerHTML = html
+      e.innerHTML = escape(html)
       $('log').appendChild(e);
     };
     let defCount = 0;
