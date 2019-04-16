@@ -52,11 +52,11 @@ Now Emscripten is mostly written in Python actually, so you don't need
 to build it.  Just run `~/src/emscripten/emcc` and it will set itself up
 for the first time, creating a file `~/.emscripten` as it does so.
 
-You need to edit that file to point it to your LLVM.  Go into it and
+You need to edit that file to point it to your LLVM.  Go into `~/.emscripten` and
 change the `LLVM_ROOT` line to read:
 
 ```
-LLVM_ROOT = os.path.expanduser(os.getenv('LLVM', '/home/wingo/src/llvm-project/build/bin'))
+LLVM_ROOT = os.path.expanduser(os.getenv('LLVM', '~/src/llvm-project/build/bin'))
 ```
 
 And at that point, you should be good to go.
