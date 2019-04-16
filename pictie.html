@@ -29,7 +29,7 @@
     };
     let addLog = (container, html) => {
       let e = document.createElement(container);
-      e.innerHTML = escape(html)
+      e.innerHTML = html
       $('log').appendChild(e);
     };
     let defCount = 0;
@@ -41,15 +41,20 @@
       },
       postRun() {
         $('status').innerHTML = "Ready.";
-        addLog('p', `Welcome to Pictie.  Loading took ${Date.now() -
-    beginLoad}ms.  Put a Pictie expression in the prompt below.  Some examples:`);
         $('form').hidden = false;
         for (let k in Module)
           if (!(k in window) && !ignoredDefinitions.has(k))
             window[k] = Module[k];
-        evalAndPaint('bg = below(black(), gray())');
+        addLog('p', `Welcome to <a href="https://github.com/wingo/pictie/">Pictie</a>.  Loading took ${Date.now() -
+    beginLoad}ms.  Put an expression in the prompt below, and if it evaluates to
+    a painter, we'll paint it.
+    See <a href="https://github.com/wingo/pictie/blob/master/README.md">README.md</a>
+    for more background.  Here are some examples to get you started:`);
+        evalAndPaint('blue()')
+        evalAndPaint('beside3($0, white(), red())')
         evalAndPaint('function check(a, inv) { let row = beside3(a, inv(a), a); return above3(row, inv(row), row); }');
-        evalAndPaint('check(bg, flipVert)');
+        evalAndPaint('transform(check($1, flipHoriz), new Vector(0.5,0), new Vector(0,0.5), new Vector(1,0.5))');
+        addLog('p', 'See <a href="https://github.com/wingo/pictie/blob/master/EXAMPLES.md">EXAMPLES.md</a> for more pasteable examples.');
         $('entry').focus();
       },
     };
@@ -78,7 +83,7 @@
       return c;
     }
     let evalAndPaint = expr => {
-      addLog('pre', '> ' + expr);
+      addLog('pre', escape('> ' + expr));
       let eval_ = eval;
       let result, success = false;
       try {
@@ -96,11 +101,11 @@
             x.appendChild(img);
             $('log').appendChild(x);
           } else {
-            addLog('pre', def + ' = ' + result);
+            addLog('pre', def + ' = ' + escape(result));
           }
         }
       } catch (e) {
-        addLog('pre', e.toString());
+        addLog('pre', escape(e.toString()));
       }
     }
     $('form').onsubmit = event => {

@@ -374,6 +374,8 @@ PainterPtr above3(PainterPtr a, PainterPtr b, PainterPtr c) {
 PainterPtr black() { return color(Color::black()); }
 PainterPtr gray() { return color(Color::gray()); }
 PainterPtr white() { return color(Color::white()); }
+PainterPtr blue() { return color(Color::blue()); }
+PainterPtr red() { return color(Color::red()); }
 
 // (define diagonal-shading (procedure->painter (λ (x y) (* 100 (+ x y)))))
 // (define einstein         (bitmap->painter einstein-file))

@@ -187,8 +187,8 @@ white()
 
 ## Painter interface
 
-See pictie.html for the interface for how to actually set up a paint and
-get pixels into a canvas.
+See [pictie.html](./pictie.html) for the interface for how to actually
+set up a paint and get pixels into a canvas.
 
 Note that for the moment we don't actually clean up after anything.  It
 would be hard to do for the painters, as they are shared_ptr instances.

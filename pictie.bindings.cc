@@ -32,6 +32,8 @@ EMSCRIPTEN_BINDINGS(interface_tests) {
     .class_function("black", &Color::black)
     .class_function("gray", &Color::gray)
     .class_function("white", &Color::white)
+    .class_function("blue", &Color::blue)
+    .class_function("red", &Color::red)
     .constructor<>()
     .constructor<uint8_t>()
     .constructor<uint8_t, uint8_t, uint8_t>()
@@ -86,6 +88,8 @@ EMSCRIPTEN_BINDINGS(interface_tests) {
   function("black", &black);
   function("gray", &gray);
   function("white", &white);
+  function("blue", &blue);
+  function("red", &red);
 
   function("paint", &paint);
 }

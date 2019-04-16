@@ -70,6 +70,8 @@ struct Color
   static Color black() { return Color(0); }
   static Color gray() { return Color(150); }
   static Color white() { return Color(255); }
+  static Color blue() { return Color(10, 10, 200); }
+  static Color red() { return Color(200, 10, 10); }
 };
 
 enum class LineCapStyle { Butt, Square };
@@ -143,5 +145,7 @@ PainterPtr above3(PainterPtr a, PainterPtr b, PainterPtr c);
 PainterPtr black();
 PainterPtr gray();
 PainterPtr white();
+PainterPtr blue();
+PainterPtr red();
 
 void paint(DrawingContext& cx, PainterPtr p);
