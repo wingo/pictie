@@ -61,7 +61,7 @@ EMSCRIPTEN_BINDINGS(interface_tests) {
     .constructor<uint32_t>()
     .function("fill", &DrawingContext::fill)
     .function("drawTriangle", &DrawingContext::drawTriangle)
-    .function("drawRectangle", &DrawingContext::drawRectangle)
+    .function("drawQuad", &DrawingContext::drawQuad)
     .function("drawLine", &DrawingContext::drawLine)
     // FIXME: .function("drawPixels", &DrawingContext::drawPixels)
     // FIXME: .function("writePPM", &DrawingContext::writePPM)
@@ -73,11 +73,13 @@ EMSCRIPTEN_BINDINGS(interface_tests) {
     .smart_ptr<std::shared_ptr<const Painter>>("Painter")
     ;
 
-  function("color", &color);
+  function("triangle", &triangle);
   function("segments", &segments);
   // FIXME: function("image", &image);
   function("transform", &transform);
   function("over", &over);
+  function("parallelogram", &parallelogram);
+  function("color", &color);
   function("flipHoriz", &flipHoriz);
   function("flipVert", &flipVert);
   function("rotate90", &rotate90);

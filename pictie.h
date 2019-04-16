@@ -106,8 +106,8 @@ public:
 
   void drawTriangle(const Vector& a, const Vector &b, const Vector &c,
                     const Color& color);
-  void drawRectangle(const Vector& a, const Vector &b, const Vector &c,
-                     const Vector& d, const Color& color);
+  void drawQuad(const Vector& a, const Vector &b, const Vector &c,
+                const Vector& d, const Color& color);
   void drawLine(const Vector& a, const Vector &b, const Color& color,
                 double width, LineCapStyle lineCapStyle);
   void drawPixels(uint32_t pixelWidth, uint32_t pixelHeight, const Color* pixels,
@@ -129,16 +129,21 @@ public:
 
 using PainterPtr = std::shared_ptr<const Painter>;
 
-PainterPtr color(const Color& color);
+PainterPtr triangle(const Vector& a, const Vector& b, const Vector& c,
+                    const Color& color);
 PainterPtr segments(const std::vector<Segment> segments, const Color& color,
                     double width = 1.0,
                     LineCapStyle lineCapStyle = LineCapStyle::Butt,
                     LineWidthScaling widthScaling = LineWidthScaling::Unscaled);
-PainterPtr image(uint32_t width, uint32_t height,
-                 std::unique_ptr<Color[]> pixels);
+PainterPtr image(uint32_t width, uint32_t height, std::vector<Color>&& pixels);
+
 PainterPtr transform(PainterPtr painter, const Vector& origin,
                      const Vector& corner1, const Vector& corner2);
 PainterPtr over(PainterPtr a, PainterPtr b);
+
+PainterPtr parallelogram(const Vector& origin, const Vector& edge1,
+                         const Vector& edge2, const Color& color);
+PainterPtr color(const Color& color);
 PainterPtr flipHoriz(PainterPtr painter);
 PainterPtr flipVert(PainterPtr painter);
 PainterPtr rotate90(PainterPtr painter);

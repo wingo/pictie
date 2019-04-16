@@ -61,9 +61,9 @@ void DrawingContext::drawTriangle(const Vector& a, const Vector& b,
         pixels_[y * width_ + x] = color;
 }
 
-void DrawingContext::drawRectangle(const Vector& a, const Vector &b,
-                                   const Vector &c, const Vector& d,
-                                   const Color& color) {
+void DrawingContext::drawQuad(const Vector& a, const Vector &b,
+                              const Vector &c, const Vector& d,
+                              const Color& color) {
   drawTriangle(a, b, c, color);
   drawTriangle(c, d, a, color);
 }
@@ -76,12 +76,12 @@ void DrawingContext::drawLine(const Vector& a, const Vector &b,
     
   switch (lineCapStyle) {
   case LineCapStyle::Butt:
-    drawRectangle(a.add(r), b.add(r), b.sub(r), a.sub(r), color);
+    drawQuad(a.add(r), b.add(r), b.sub(r), a.sub(r), color);
     break;
   case LineCapStyle::Square:
-    drawRectangle(a.sub(q).add(r), b.add(q).add(r), b.add(q).sub(r),
-                  a.sub(q).sub(r),
-                  color);
+    drawQuad(a.sub(q).add(r), b.add(q).add(r), b.add(q).sub(r),
+             a.sub(q).sub(r),
+             color);
     break;
   }
 }
@@ -95,8 +95,8 @@ void DrawingContext::drawPixels(uint32_t pixelWidth, uint32_t pixelHeight,
   for (uint32_t y = 0; y < pixelHeight; y++, row = row.add(dy)) {
     Vector p = row;
     for (uint32_t x = 0; x < pixelWidth; x++, p = p.add(dx))
-      drawRectangle(p, p.add(dx), p.add(dx).add(dy), p.add(dy),
-                    pixels[(pixelHeight - y - 1) * pixelWidth + x]);
+      drawQuad(p, p.add(dx), p.add(dx).add(dy), p.add(dy),
+               pixels[(pixelHeight - y - 1) * pixelWidth + x]);
   }
 }
 
@@ -127,19 +127,22 @@ std::vector<Color> DrawingContext::getPixels() const {
   return pixels_;
 }
 
-class ColorPainter : public Painter
+class TrianglePainter : public Painter
 {
 private:
+  const Vector a_;
+  const Vector b_;
+  const Vector c_;
   const Color color_;
 
 public:
-  explicit ColorPainter(const Color& color) : color_(color) {}
+  explicit TrianglePainter(const Vector& a, const Vector& b,
+                           const Vector& c, const Color& color)
+    : a_(a), b_(b), c_(c), color_(color) {}
+
   void paint(DrawingContext &cx, const Frame& frame) const {
-    cx.drawRectangle(frame.origin,
-                     frame.origin.add(frame.edge1),
-                     frame.origin.add(frame.edge1).add(frame.edge2),
-                     frame.origin.add(frame.edge2),
-                     color_);
+    cx.drawTriangle(frame.project(a_), frame.project(b_),
+                    frame.project(c_), color_);
   }
 };
                       
@@ -283,8 +286,9 @@ public:
   }
 };
 
-PainterPtr color(const Color& color) {
-  return PainterPtr(new ColorPainter(color));
+PainterPtr triangle(const Vector& a, const Vector& b, const Vector& c,
+                    const Color& color) {
+  return PainterPtr(new TrianglePainter(a, b, c, color));
 }
 
 PainterPtr segments(const std::vector<Segment> segments, const Color& color,
@@ -294,8 +298,7 @@ PainterPtr segments(const std::vector<Segment> segments, const Color& color,
                                         lineCapStyle, widthScaling));
 }
 
-PainterPtr image(uint32_t width, uint32_t height,
-                 std::vector<Color>&& pixels) {
+PainterPtr image(uint32_t width, uint32_t height, std::vector<Color>&& pixels) {
   return PainterPtr(new ImagePainter(width, height, std::move(pixels)));
 }
 
@@ -307,6 +310,18 @@ PainterPtr transform(PainterPtr painter,
 
 PainterPtr over(PainterPtr a, PainterPtr b) {
   return PainterPtr(new OverPainter(a, b));
+}
+
+PainterPtr parallelogram(const Vector& origin, const Vector& edge1,
+                         const Vector& edge2, const Color& color) {
+  return over(triangle(origin, origin.add(edge1),
+                       origin.add(edge1).add(edge2), color),
+              triangle(origin, origin.add(edge1).add(edge2),
+                       origin.add(edge2), color));
+}
+              
+PainterPtr color(const Color& color) {
+  return parallelogram(Vector(0,0), Vector(1,0), Vector(0,1), color);
 }
 
 PainterPtr flipHoriz(PainterPtr painter) {
