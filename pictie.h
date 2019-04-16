@@ -36,15 +36,6 @@ public:
   static Vector zero() { return Vector(0, 0); }
 };
 
-struct Segment
-{
-  Vector start;
-  Vector end;
-
-  Segment(const Vector& start, const Vector& end)
-    : start(start), end(end) {}
-};
-
 struct Frame
 {
   const Vector origin;
@@ -56,10 +47,6 @@ struct Frame
 
   Vector project(const Vector& p) const {
     return origin.add(edge1.scale(p.x).add(edge2.scale(p.y)));
-  }
-
-  Segment project(const Segment& s) const {
-    return Segment(project(s.start), project(s.end));
   }
 
   Frame project(const Frame& f) const {
@@ -131,10 +118,10 @@ using PainterPtr = std::shared_ptr<const Painter>;
 
 PainterPtr triangle(const Vector& a, const Vector& b, const Vector& c,
                     const Color& color);
-PainterPtr segments(const std::vector<Segment> segments, const Color& color,
-                    double width = 1.0,
-                    LineCapStyle lineCapStyle = LineCapStyle::Butt,
-                    LineWidthScaling widthScaling = LineWidthScaling::Unscaled);
+PainterPtr path(const std::vector<Vector> points, const Color& color,
+                double width = 1.0,
+                LineCapStyle lineCapStyle = LineCapStyle::Butt,
+                LineWidthScaling widthScaling = LineWidthScaling::Unscaled);
 PainterPtr image(uint32_t width, uint32_t height, std::vector<Color>&& pixels);
 
 PainterPtr transform(PainterPtr painter, const Vector& origin,

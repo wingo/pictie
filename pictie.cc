@@ -146,21 +146,21 @@ public:
   }
 };
                       
-class SegmentsPainter : public Painter
+class PathPainter : public Painter
 {
 private:
-  std::vector<Segment> segments_;
+  std::vector<Vector> points_;
   const Color color_;
   double width_;
   LineCapStyle lineCapStyle_;
   LineWidthScaling widthScaling_;
 
 public:
-  SegmentsPainter(const std::vector<Segment> segments, const Color& color,
-                  double width = 1.0,
-                  LineCapStyle lineCapStyle = LineCapStyle::Butt,
-                  LineWidthScaling widthScaling = LineWidthScaling::Unscaled)
-    : segments_(segments), color_(color), width_(width),
+  PathPainter(const std::vector<Vector> points, const Color& color,
+              double width = 1.0,
+              LineCapStyle lineCapStyle = LineCapStyle::Butt,
+              LineWidthScaling widthScaling = LineWidthScaling::Unscaled)
+    : points_(points), color_(color), width_(width),
       lineCapStyle_(lineCapStyle), widthScaling_(widthScaling) {}
 
   void paint(DrawingContext &cx, const Frame& frame) const {
@@ -178,8 +178,8 @@ public:
     default:
       abort();
     }
-    for (auto segment : segments_)
-      cx.drawLine(frame.project(segment.start), frame.project(segment.end),
+    for (size_t i = 0; i + 1 < points_.size(); i++)
+      cx.drawLine(frame.project(points_[i]), frame.project(points_[i+1]),
                   color_, width, lineCapStyle_);
   };
 };
@@ -196,7 +196,10 @@ public:
   ImagePainter(uint32_t width, uint32_t height,
                std::vector<Color>&& pixels)
     : width_(width), height_(height), pixels_(pixels)
-  {}
+  {
+    if (width_ * height_ != pixels_.size())
+      abort();
+  }
   
   static ImagePainter* fromPPM(const char *fname) {
     FILE *f = fopen(fname, "r");
@@ -291,11 +294,12 @@ PainterPtr triangle(const Vector& a, const Vector& b, const Vector& c,
   return PainterPtr(new TrianglePainter(a, b, c, color));
 }
 
-PainterPtr segments(const std::vector<Segment> segments, const Color& color,
-                    double width, LineCapStyle lineCapStyle,
-                    LineWidthScaling widthScaling) {
-  return PainterPtr(new SegmentsPainter(std::move(segments), color, width,
-                                        lineCapStyle, widthScaling));
+PainterPtr path(const std::vector<Vector> points, const Color& color,
+                double width, LineCapStyle lineCapStyle,
+                LineWidthScaling widthScaling) {
+
+  return PainterPtr(new PathPainter(std::move(points), color, width,
+                                    lineCapStyle, widthScaling));
 }
 
 PainterPtr image(uint32_t width, uint32_t height, std::vector<Color>&& pixels) {

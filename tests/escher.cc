@@ -2,13 +2,25 @@
 
 #include "../pictie.h"
 
+class Segment {
+public:
+  Vector from, to;
+  Segment(Vector from, Vector to) : from(from), to(to) {}
+};
+
 static PainterPtr grid(double width, double height, std::vector<Segment> segs) {
   Frame f(Vector(0,0), Vector(1/width,0), Vector(0,1/height));
-  std::vector<Segment> scaled;
-  for (auto s : segs)
-    scaled.push_back(f.project(s));
-  return segments(scaled, Color::black(), 0.002, LineCapStyle::Square,
-                  LineWidthScaling::Unscaled);
+  auto line = [&](auto a, auto b) {
+    return path({f.project(a), f.project(b)}, Color::black(), 0.002,
+                LineCapStyle::Square, LineWidthScaling::Unscaled);
+  };
+    
+  PainterPtr ret = nullptr;
+  for (auto s : segs) {
+    auto p = line(s.from, s.to);
+    ret = ret ? over(ret, p) : p;
+  }
+  return ret;
 }
 
 static PainterPtr escher() {
