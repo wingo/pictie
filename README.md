@@ -15,13 +15,68 @@ github](https://github.com/wingo/pictie/tree/master/tests).
 
 ## WebAssembly
 
-It's easier than you might think!  If Emscripten is in your path, then
-you just run `make`.  The result will be a `pictie.js` and `pictie.wasm`
-file in the local directory.
+It's easier than you might think!
 
-If you have Emscripten built in `~/src/emscripten-core/emscripten`, then
-pass the `EMSCRIPTEN` variable to make, as in `make
-EMSCRIPTEN=~/src/emscripten-core/emscripten`.
+### Install Emscripten
+
+This is probably not the easiest way to install Emscripten, but since
+Emscripten just switched to use LLVM's WebAssembly backend instead of
+its own, at least it is foolproof.  See [the upstream
+documentation](https://emscripten.org/docs/getting_started/downloads.html)
+for the official recommendations.
+
+Download and build LLVM, enabling WebAssembly and the LLVM linker:
+
+```
+cd ~/src
+git clone https://github.com/llvm/llvm-project.git
+cd llvm-project
+mkdir build
+cd build
+cmake -DLLVM_ENABLE_PROJECTS='lld;clang' -DLLVM_EXPERIMENTAL_TARGETS_TO_BUILD=WebAssembly -G "Unix Makefiles" ../llvm
+make -j40
+```
+
+You might have to adjust the `-j40` level.  Also, the final linking
+phase sometimes runs out of memory, so you might need to re-run the
+`make` stage until it works.
+
+Then download Emscripten:
+
+```
+cd ~/src
+git clone https://github.com/emscripten-core/emscripten.git
+```
+
+Now Emscripten is mostly written in Python actually, so you don't need
+to build it.  Just run `~/src/emscripten/emcc` and it will set itself up
+for the first time, creating a file `~/.emscripten` as it does so.
+
+You need to edit that file to point it to your LLVM.  Go into it and
+change the `LLVM_ROOT` line to read:
+
+```
+LLVM_ROOT = os.path.expanduser(os.getenv('LLVM', '/home/wingo/src/llvm-project/build/bin'))
+```
+
+And at that point, you should be good to go.
+
+### Build pictie.wasm
+
+If you installed emscripten as above, then to build WebAssembly files,
+just run:
+
+```
+make EMSCRIPTEN=~/src/emscripten
+```
+
+If you installed emscripten somewhere else, adjust `EMSCRIPTEN`
+appropriately.
+
+The result will be a `pictie.js` and `pictie.wasm` file in the local
+directory.
+
+### Test it out in your web browser
 
 There is a `pictie.html` test harness in the root directory that
 provides a kind of interactive graphics workbench, and which we use to
@@ -30,9 +85,8 @@ requires that the web browser can be able to load `pictie.js` and
 `pictie.wasm` from the same directory, which isn't always the case;
 Chrome for example will refuse to do so.  So, the solution there is that
 emscripten packages a web server as well, which you can run via `make
-run`.  As before, you might need to pass
-`EMSCRIPTEN=~/src/emscripten-core/emscripten` or something on the
-command-line.
+run`.  As before, you might need to pass `EMSCRIPTEN=~/src/emscripten`
+or something on the command-line.
 
 But, maybe you just want to have a peek, so you can give it a go at
 https://people.igalia.com/awingo/pictie.html.  No guarantees that this
