@@ -76,6 +76,13 @@ appropriately.
 The result will be a `pictie.js` and `pictie.wasm` file in the local
 directory.
 
+The default optimization flags passed to Emscripten is `-Oz`, to
+optimize for smallest code size.  You can change these flags by setting
+`EMFLAGS`, as in `make EMSCRIPTEN=~/src/emscripten EMFLAGS='-Oz
+--closure 1'`.  (Setting `--closure 1` enables the use of the Google
+closure compiler on `pictie.js`, for better dead-code elimination and
+minification.)
+
 ### Test it out in your web browser
 
 There is a `pictie.html` test harness in the root directory that
