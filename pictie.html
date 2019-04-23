@@ -101,7 +101,7 @@
             x.appendChild(img);
             $('log').appendChild(x);
           } else {
-            addLog('pre', def + ' = ' + escape(result));
+            addLog('pre', def + ' = ' + escape(''+result));
           }
         }
       } catch (e) {

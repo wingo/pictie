@@ -121,7 +121,7 @@ using PainterPtr = std::shared_ptr<const Painter>;
 PainterPtr triangle(const Vector& a, const Vector& b, const Vector& c,
                     const Color& color);
 PainterPtr path(const std::vector<Vector> points, const Color& color,
-                double width = 1.0,
+                double width = 0.01,
                 LineCapStyle lineCapStyle = LineCapStyle::Butt,
                 LineWidthScaling widthScaling = LineWidthScaling::Unscaled);
 PainterPtr image(uint32_t width, uint32_t height, std::vector<Color>&& pixels);
